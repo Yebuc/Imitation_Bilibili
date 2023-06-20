@@ -40,6 +40,48 @@
                 )
     </insert>
 
+    <update id="updateUserInfos" parameterType="com.imooc.bilibili.domain.UserInfo">
+        update
+        t_user_info
+        set
+        <if test="nick != null and nick != '' ">
+            nick = #{nick},
+        </if>
+        <if test="avatar != null">
+            avatar = #{avatar},
+        </if>
+        <if test="sign != null">
+            sign = #{sign},
+        </if>
+        <if test="birth != null and birth != '' ">
+            birth = #{birth},
+        </if>
+        <if test="gender != null and gender != '' ">
+            gender = #{gender},
+        </if>
+        updateTime = #{updateTime}
+        where
+        userId = #{userId}
+    </update>
+
+    <update id="updateUsers" parameterType="com.imooc.bilibili.domain.User">
+        update
+        t_user
+        set
+        <if test="phone != null and phone != '' ">
+            phone = #{phone},
+        </if>
+        <if test="email != null and email != '' ">
+            email = #{email},
+        </if>
+        <if test="password != null and password != '' ">
+            password = #{password},
+        </if>
+        updateTime = #{updateTime}
+        where
+        id = #{id}
+    </update>
+
     <!--    <sql id="Base_Column_List">-->
 <!--        id,title,content,tags,-->
 <!--        thumbNum,favourNum,userId,-->

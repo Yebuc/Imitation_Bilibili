@@ -95,10 +95,30 @@ public class UserService {
         }
     }
 
-    public User getUserInfo(Long userId) {
+    public User getUserInfo(Long userId) {//得到当前user信息
         User user = userDao.getUserById(userId);
         UserInfo userInfo = userDao.getUserInfoByUserId(userId);
         user.setUserInfo(userInfo);
         return user;
+    }
+
+    public void updateUserInfos(UserInfo userInfo) {//更新userInfo
+        userInfo.setUpdateTime(new Date());
+        userDao.updateUserInfos(userInfo);
+    }
+
+    public void updateUsers(User user) throws Exception {
+        Long id = user.getId();
+        User dbUser = userDao.getUserById(id);
+        if(dbUser == null){
+            throw new ConditionException("用户不存在！");
+        }
+        if(!StringUtils.isNullOrEmpty(user.getPassword())){
+            String rawPassword = RSAUtil.decrypt(user.getPassword());
+            String md5Password = MD5Util.sign(rawPassword, dbUser.getSalt(), "UTF-8");
+            user.setPassword(md5Password);
+        }
+        user.setUpdateTime(new Date());
+        userDao.updateUsers(user);
     }
 }
