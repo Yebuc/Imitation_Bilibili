@@ -35,6 +35,22 @@
             <artifactId>spring-boot-devtools</artifactId>
             <version>2.5.1</version>
         </dependency>
+        <dependency><!--加密解密的工具包如：AES,RSA,MD5等-->
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.14</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.10</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.78</version>
+        </dependency>
+
 
     </dependencies>
 
