@@ -56,6 +56,17 @@
             <version>3.18.2</version>
         </dependency>
 
+        <dependency><!--rocketmq依赖，如果出问题可以使用版本4.9.1-->
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-client</artifactId>
+            <version>4.9.4</version>
+        </dependency>
+        <dependency><!--springframework自带的一个操作数据库的依赖-->
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <version>2.2.2.RELEASE</version>
+        </dependency>
+
 
     </dependencies>
 
