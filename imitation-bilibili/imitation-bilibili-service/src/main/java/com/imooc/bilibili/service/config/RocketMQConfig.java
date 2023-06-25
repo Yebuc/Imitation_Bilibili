@@ -51,28 +51,30 @@ public class RocketMQConfig {
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(UserMomentsConstant.GROUP_MOMENTS);
         consumer.setNamesrvAddr(nameServerAddr);
         consumer.subscribe(UserMomentsConstant.TOPIC_MOMENTS, "*");//subExpression指下一级主题，*指跟这个主题相关的所有内容都要进行订阅
-        consumer.registerMessageListener(new MessageListenerConcurrently() {//给消费者添加监听器   并发监听
+        consumer.registerMessageListener(new MessageListenerConcurrently() {//给消费者添加实时监听器   并发监听
             @Override
             public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context){//rocketMQ中封装消息的扩种---MessageExt：属于rocketMQ的封装类
-                MessageExt msg = msgs.get(0);
+                MessageExt msg = msgs.get(0);//每次添加数据的时候，只默认向MQ中添加1条元素，所以msgs中只会有一条数据   根据场景适用性来具体设置，此场景下，每次一般一个用户只会增加一条动态
                 if(msg == null){
                     return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                 }
-                String bodyStr = new String(msg.getBody());
-                UserMoment userMoment = JSONObject.toJavaObject(JSONObject.parseObject(bodyStr), UserMoment.class);
+
+                String bodyStr = new String(msg.getBody());//byte数组转换为了相关的字符串
+                UserMoment userMoment = JSONObject.toJavaObject(JSONObject.parseObject(bodyStr), UserMoment.class);//把相关的实体类取出来----将对应的字符串转成相关的实体类
                 Long userId = userMoment.getUserId();
-                List<UserFollowing>fanList = userFollowingService.getUserFans(userId);
+                List<UserFollowing> fanList = userFollowingService.getUserFans(userId);
                 for(UserFollowing fan : fanList){
-                    String key = "subscribed-" + fan.getUserId();
-                    String subscribedListStr = redisTemplate.opsForValue().get(key);
+                    String key = "subscribed-" + fan.getUserId();//使用redis做缓存   此处为redis的key
+                    String subscribedListStr = redisTemplate.opsForValue().get(key);//对redis中的数据进行操作
                     List<UserMoment> subscribedList;
                     if(StringUtil.isNullOrEmpty(subscribedListStr)){
                         subscribedList = new ArrayList<>();
                     }else{
                         subscribedList = JSONArray.parseArray(subscribedListStr, UserMoment.class);
                     }
-                    subscribedList.add(userMoment);
-                    redisTemplate.opsForValue().set(key, JSONObject.toJSONString(subscribedList));
+                    subscribedList.add(userMoment);//将该subscribed-userId 键 Key所对应的所有消息封装到一个List中保存，List为值，用户直接在redis中查询就可以得到推送给自己的消息
+                    redisTemplate.opsForValue().set(key, JSONObject.toJSONString(subscribedList));//JSONObject.toJSONString(subscribedList)将subscribedList转换成Json字符串格式的数据
+
                 }
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
             }
