@@ -1,13 +1,18 @@
 package com.imooc.bilibili.api;
 
+import com.alibaba.fastjson.JSONObject;
 import com.imooc.bilibili.api.support.UserSupport;
 import com.imooc.bilibili.domain.JsonResponse;
+import com.imooc.bilibili.domain.PageResult;
 import com.imooc.bilibili.domain.User;
 import com.imooc.bilibili.domain.UserInfo;
+import com.imooc.bilibili.service.UserFollowingService;
 import com.imooc.bilibili.service.UserService;
 import com.imooc.bilibili.service.util.RSAUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author Amber
@@ -20,6 +25,8 @@ public class UserApi {
     private UserService userService;
     @Autowired
     private UserSupport userSupport;
+    @Autowired
+    private UserFollowingService userFollowingService;
 
 
     @GetMapping("/users")//得到当前用户的信息
@@ -59,6 +66,23 @@ public class UserApi {
         userInfo.setUserId(currentUserId);
         userService.updateUserInfos(userInfo);
         return JsonResponse.success();
+    }
+
+    //用户分页查询的接口   是给关注用户来服务的
+    @GetMapping("/user-infos")
+    public JsonResponse<PageResult<UserInfo>> pageListUserInfos(@RequestParam Integer no, @RequestParam Integer size, String nick){
+        Long userId = userSupport.getCurrentUserId();
+        JSONObject params = new JSONObject();//JSONObject是在fastJson里面封装的包，里面实现了Map类以及内置了一些比较好用的方法，可以直接把它当作map来使用
+        params.put("no", no);
+        params.put("size", size);
+        params.put("nick", nick);
+        params.put("userId", userId);
+        PageResult<UserInfo> result = userService.pageListUserInfos(params);
+        if(result.getTotal() > 0){
+            List<UserInfo> checkedUserInfoList = userFollowingService.checkFollowingStatus(result.getList(), userId);//检查关注的状态,---检查查出来的用户有没有被当前登录的用户关注过
+            result.setList(checkedUserInfoList);
+        }
+        return new JsonResponse<>(result);
     }
 
 

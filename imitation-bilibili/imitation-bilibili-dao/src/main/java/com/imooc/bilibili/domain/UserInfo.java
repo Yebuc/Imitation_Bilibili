@@ -32,7 +32,7 @@ public class UserInfo {
 //    @Field(type = FieldType.Date)
     private Date updateTime;
 
-    private Boolean followed;
+    private Boolean followed;//标志位，标识当前用户被关注了
 
     public Long getId() {
         return id;

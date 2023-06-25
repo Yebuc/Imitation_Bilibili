@@ -133,4 +133,52 @@
             userId = #{userId}
     </select>
 
+
+    <!--这里传入的是一个列表，这里我们不用指定传入参数的类型，只要写出传入的参数是什么就可以了，mybatis会自动识别-->
+    <select id="getUserInfoByUserIds" resultType="com.imooc.bilibili.domain.UserInfo">
+        select
+        *
+        from
+        t_user_info
+        where
+        1=1
+        <if test="userIdList != null and userIdList.size > 0">
+            and userId in
+            <foreach collection="userIdList" item = "userId" index="index" open="(" close=")" separator=",">
+                #{userId}
+            </foreach>
+        </if>
+    </select>
+    <!--上面的where 1=1意思是如果接下来的if条件不生效，则会查询所有的消息-->
+
+
+     <!--（这里是通过nick的模糊查询）得到所有需要查询数据的总个数total-->
+    <select id="pageCountUserInfos" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select
+        count(1)
+        from
+        t_user_info
+        where
+        1=1
+        <if test="nick != null and nick != '' ">
+            and nick like '%${nick}%'
+        </if>
+    </select>
+
+    <!--分页查询用户信息-->
+    <select id="pageListUserInfos" parameterType="java.util.Map" resultType="com.imooc.bilibili.domain.UserInfo">
+        select
+        *
+        from
+        t_user_info
+        where
+        1=1
+        <if test="nick != null and nick != '' ">
+            and nick like '%${nick}%'
+        </if>
+        order by id desc
+        limit #{start}, #{limit}
+    </select>
+
+
 </mapper>

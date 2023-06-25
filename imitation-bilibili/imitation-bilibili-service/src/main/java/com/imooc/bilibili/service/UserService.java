@@ -1,7 +1,9 @@
 package com.imooc.bilibili.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.imooc.bilibili.dao.UserDao;
 import com.imooc.bilibili.domain.JsonResponse;
+import com.imooc.bilibili.domain.PageResult;
 import com.imooc.bilibili.domain.User;
 import com.imooc.bilibili.domain.UserInfo;
 import com.imooc.bilibili.domain.constant.UserConstant;
@@ -14,7 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -121,4 +126,26 @@ public class UserService {
         user.setUpdateTime(new Date());
         userDao.updateUsers(user);
     }
+
+    public User getUserById(Long followingId) {
+        return userDao.getUserById(followingId);
+    }
+
+    public List<UserInfo> getUserInfoByUserIds(Set<Long> userIdList) {
+        return userDao.getUserInfoByUserIds(userIdList);
+    }
+
+    public PageResult<UserInfo> pageListUserInfos(JSONObject params) {//分页查询UserInfo
+        Integer no = params.getInteger("no");//使用JSONObject可以不用类型转换
+        Integer size = params.getInteger("size");
+        params.put("start", (no-1)*size);
+        params.put("limit", size);
+        Integer total = userDao.pageCountUserInfos(params);//得到所有需要查询数据的总个数total
+        List<UserInfo> list = new ArrayList<>();
+        if(total > 0){
+            list = userDao.pageListUserInfos(params);
+        }
+        return new PageResult<>(total, list);
+    }
+
 }
