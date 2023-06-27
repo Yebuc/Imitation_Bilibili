@@ -2,10 +2,7 @@ package com.imooc.bilibili.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.imooc.bilibili.dao.UserDao;
-import com.imooc.bilibili.domain.JsonResponse;
-import com.imooc.bilibili.domain.PageResult;
-import com.imooc.bilibili.domain.User;
-import com.imooc.bilibili.domain.UserInfo;
+import com.imooc.bilibili.domain.*;
 import com.imooc.bilibili.domain.constant.UserConstant;
 import com.imooc.bilibili.domain.exception.ConditionException;
 import com.imooc.bilibili.service.util.MD5Util;
@@ -14,10 +11,8 @@ import com.imooc.bilibili.service.util.TokenUtil;
 import com.mysql.cj.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+
+import java.util.*;
 
 
 /**
@@ -150,6 +145,57 @@ public class UserService {
             list = userDao.pageListUserInfos(params);
         }
         return new PageResult<>(total, list);
+    }
+
+
+    public Map<String, Object> loginForDts(User user) throws Exception{
+        String phone = user.getPhone() == null ? "" : user.getPhone();
+        String email = user.getEmail() == null ? "" : user.getEmail();
+        if(StringUtils.isNullOrEmpty(phone) && StringUtils.isNullOrEmpty(email)){
+            throw new ConditionException("参数异常！");
+        }
+        User dbUser = userDao.getUserByPhoneOrEmail(phone, email);
+        if(dbUser == null){
+            throw new ConditionException("当前用户不存在！");
+        }
+        String password = user.getPassword();
+        String rawPassword;
+        try{
+            rawPassword = RSAUtil.decrypt(password);
+        }catch (Exception e){
+            throw new ConditionException("密码解密失败！");
+        }
+        String salt = dbUser.getSalt();
+        String md5Password = MD5Util.sign(rawPassword, salt, "UTF-8");
+        if(!md5Password.equals(dbUser.getPassword())){
+            throw new ConditionException("密码错误！");
+        }
+        Long userId = dbUser.getId();
+        String accessToken = TokenUtil.generateToken(userId);
+        //到这为止，和单token的步骤相同
+
+        String refreshToken = TokenUtil.generateRefreshToken(userId);//创建refreshToken
+        //保存refresh token到数据库   在用户退出登录或者想要延迟刷新access token有效期的时候，需要查着refresh token表，以此逻辑上相关联
+        userDao.deleteRefreshTokenByUserId(userId);  //这里其实加一个事务特性会好一点，因为更新操作是先删除后增加，可能会发生数据丢失无法回滚数据
+        userDao.addRefreshToken(refreshToken, userId, new Date());
+        Map<String, Object> result = new HashMap<>();
+        result.put("accessToken", accessToken);
+        result.put("refreshToken", refreshToken);
+        return result;
+    }
+
+
+    public void logout(String refreshToken, Long userId) {//将用户对应的refresh token从数据库表中给删除掉
+        userDao.deleteRefreshToken(refreshToken, userId);
+    }
+
+    public String refreshAccessToken(String refreshToken) throws Exception {//根据refresh token刷新access token  可以减少用户登录次数
+        RefreshTokenDetail refreshTokenDetail = userDao.getRefreshTokenDetail(refreshToken);
+        if(refreshTokenDetail == null){
+            throw new ConditionException("555","token过期！");
+        }
+        Long userId = refreshTokenDetail.getUserId();
+        return TokenUtil.generateToken(userId);
     }
 
 }

@@ -40,6 +40,19 @@
                 )
     </insert>
 
+    <insert id="addRefreshToken">
+        insert into
+            t_refresh_token(
+            refreshToken,
+            userId,
+            createTime
+        )values(
+                   #{refreshToken},
+                   #{userId},
+                   #{createTime}
+               )
+    </insert>
+
     <update id="updateUserInfos" parameterType="com.imooc.bilibili.domain.UserInfo">
         update
         t_user_info
@@ -81,6 +94,21 @@
         where
         id = #{id}
     </update>
+
+    <delete id="deleteRefreshTokenByUserId" parameterType="java.lang.Long">
+        delete from
+            t_refresh_token
+        where
+            userId = #{userId}
+    </delete>
+
+    <delete id="deleteRefreshToken">
+        delete from
+            t_refresh_token
+        where
+            refreshToken = #{refreshToken}
+          and userId = #{userId}
+    </delete>
 
     <!--    <sql id="Base_Column_List">-->
 <!--        id,title,content,tags,-->
@@ -178,6 +206,15 @@
         </if>
         order by id desc
         limit #{start}, #{limit}
+    </select>
+
+    <select id="getRefreshTokenDetail" parameterType="java.lang.String" resultType="com.imooc.bilibili.domain.RefreshTokenDetail">
+        select
+            *
+        from
+            t_refresh_token
+        where
+            refreshToken = #{refreshToken}
     </select>
 
 

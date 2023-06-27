@@ -12,7 +12,9 @@ import com.imooc.bilibili.service.util.RSAUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Amber
@@ -84,6 +86,32 @@ public class UserApi {
         }
         return new JsonResponse<>(result);
     }
+
+    //下面的三个接口主要功能是实现双token的登录模式---->access token 与 refresh token
+
+
+    @PostMapping("/user-dts")//dts--->double tokens  通过双token来登录   上方的单token方式返回的是string，而双token的返回数据是有所不同的！！！  返回的是双token
+    public JsonResponse<Map<String, Object>> loginForDts(@RequestBody User user) throws Exception {
+        Map<String, Object> map = userService.loginForDts(user);
+        return new JsonResponse<>(map);
+    }
+
+    @DeleteMapping("/refresh-tokens")//退出登录接口，需要将对应的refresh token给删除掉
+    public JsonResponse<String> logout(HttpServletRequest request){
+        String refreshToken = request.getHeader("refreshToken");
+        Long userId = userSupport.getCurrentUserId();
+        userService.logout(refreshToken, userId);
+        return JsonResponse.success();
+    }
+
+    @PostMapping("/access-tokens")//刷新access token给前端，与之前的access token是不一样的哦
+    public JsonResponse<String> refreshAccessToken(HttpServletRequest request) throws Exception {
+        String refreshToken = request.getHeader("refreshToken");
+        String accessToken = userService.refreshAccessToken(refreshToken);
+        return new JsonResponse<>(accessToken);
+    }
+
+
 
 
 }
