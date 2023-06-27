@@ -31,6 +31,8 @@ public class UserMomentsService {
 
     public void addUserMoments(UserMoment userMoment) throws Exception {
         userMoment.setCreateTime(new Date());
+        //todo 应该在做一个判断，是否有发布内容，即contentId是否为空，不能发布空动态
+
         userMomentsDao.addUserMoments(userMoment);//新增动态    往下应该往MQ之中发送一条消息，来告诉相关的订阅者，发布了一条新的动态
         //获取到新生成了producer
         DefaultMQProducer producer = (DefaultMQProducer)applicationContext.getBean("momentsProducer");//使用applicationContext.getBean获取到RocketMQConfig中的momentsProducer的bean

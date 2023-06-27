@@ -14,8 +14,6 @@ import com.imooc.bilibili.service.util.TokenUtil;
 import com.mysql.cj.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,6 +30,8 @@ public class UserService {
     @Autowired
     private UserDao userDao;
 
+    @Autowired
+    private UserAuthService userAuthService;
 
     public void addUser(User user) {//注册
         String phone = user.getPhone();
@@ -64,6 +64,10 @@ public class UserService {
         userInfo.setGender(UserConstant.GENDER_MALE);
         userInfo.setCreateTime(now);
         userDao.addUserInfo(userInfo);
+        //添加用户默认权限角色
+        userAuthService.addUserDefaultRole(user.getId());
+        //同步用户信息数据到es
+//        elasticSearchService.addUserInfo(userInfo);
     }
 
     public User getUserByPhone(String phone){

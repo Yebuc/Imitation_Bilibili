@@ -12,7 +12,7 @@ public class UserRole {
 
     private String roleName;
 
-    private String roleCode;
+    private String roleCode;//角色的唯一编码
 
     private Date createTime;
 

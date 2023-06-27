@@ -17,10 +17,10 @@ public class AuthRoleService {
     private AuthRoleDao authRoleDao;
 
     @Autowired
-    private AuthRoleElementOperationService authRoleElementOperationService;
+    private AuthRoleElementOperationService authRoleElementOperationService;//查询操作权限
 
     @Autowired
-    private AuthRoleMenuService authRoleMenuService;
+    private AuthRoleMenuService authRoleMenuService;//查询页面菜单查看权限
 
     public List<AuthRoleElementOperation> getRoleElementOperationsByRoleIds(Set<Long> roleIdSet) {
         return authRoleElementOperationService.getRoleElementOperationsByRoleIds(roleIdSet);

@@ -8,6 +8,6 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD})
 @Documented
 @Component
-public @interface DataLimited {
+public @interface DataLimited {//数据权限控制接口aop注解
 
 }

@@ -25,8 +25,8 @@ public class UserMomentsApi {
     private UserSupport userSupport;
 
 
-    @ApiLimitedRole(limitedRoleCodeList = {AuthRoleConstant.ROLE_LV0})
-    @DataLimited
+    @ApiLimitedRole(limitedRoleCodeList = {AuthRoleConstant.ROLE_LV0})//advice标志注解---aop相关
+    @DataLimited//advice标志注解---aop相关
     @PostMapping("/user-moments")//添加用户动态---也叫新增用户动态
     public JsonResponse<String> addUserMoments(@RequestBody UserMoment userMoment) throws Exception {
         Long userId = userSupport.getCurrentUserId();

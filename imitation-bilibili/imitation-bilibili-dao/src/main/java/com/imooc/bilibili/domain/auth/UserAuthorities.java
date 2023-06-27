@@ -2,7 +2,7 @@ package com.imooc.bilibili.domain.auth;
 
 import java.util.List;
 
-public class UserAuthorities {
+public class UserAuthorities {//用户的权限实体类
 
     List<AuthRoleElementOperation> roleElementOperationList;
 
