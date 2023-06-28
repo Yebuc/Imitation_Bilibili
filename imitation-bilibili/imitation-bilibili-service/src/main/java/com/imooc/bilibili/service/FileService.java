@@ -26,8 +26,9 @@ public class FileService {
                                          Integer totalSliceNo) throws Exception {
         File dbFileMD5 = fileDao.getFileByMD5(fileMD5);
         if(dbFileMD5 != null){
-            return dbFileMD5.getUrl();
+            return dbFileMD5.getUrl();//秒传实现
         }
+        //断点续传功能
         String url = fastDFSUtil.uploadFileBySlices(slice, fileMD5, sliceNo, totalSliceNo);
         if(!StringUtil.isNullOrEmpty(url)){
             dbFileMD5 = new File();
@@ -35,7 +36,7 @@ public class FileService {
             dbFileMD5.setMd5(fileMD5);
             dbFileMD5.setUrl(url);
             dbFileMD5.setType(fastDFSUtil.getFileType(slice));
-            fileDao.addFile(dbFileMD5);
+            fileDao.addFile(dbFileMD5);//保存到file表中
         }
         return url;
     }
