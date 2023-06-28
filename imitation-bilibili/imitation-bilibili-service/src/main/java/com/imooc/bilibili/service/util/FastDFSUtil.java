@@ -39,7 +39,7 @@ public class FastDFSUtil {
 
     private static final String DEFAULT_GROUP = "group1";
 
-    private static final int SLICE_SIZE = 1024 * 1024 * 2;//大小为2Mb
+    private static final int SLICE_SIZE = 1024 * 1024 * 2;//大小为2MB
 
 //    @Value("${fdfs.http.storage-addr}")
     private String httpFdfsStorageAddr;
@@ -107,7 +107,7 @@ public class FastDFSUtil {
             if(StringUtil.isNullOrEmpty(filePath)){
                 throw new ConditionException("上传失败！");
             }
-            this.modifyAppenderFile(file, filePath, uploadedSize);
+            this.modifyAppenderFile(file, filePath, uploadedSize);//modifyAppenderFile这里可以控制断点续传
             redisTemplate.opsForValue().increment(uploadedNoKey);
         }
         // 修改历史上传分片文件大小

@@ -114,6 +114,15 @@ Nginx在系统中发挥的作用主要有两个：
 
 
 
+##### 注意要设置spring boot最大文件大小上传限制
+
+```md
+spring.servlet.multipart.max-file-size=500MB
+spring.servlet.multipart.max-request-size=500MB
+```
+
+
+
 
 
 
