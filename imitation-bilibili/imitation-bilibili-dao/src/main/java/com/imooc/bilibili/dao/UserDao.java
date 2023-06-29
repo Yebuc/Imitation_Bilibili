@@ -50,4 +50,6 @@ public interface UserDao {
                                @Param("userId") Long userId);
 
     RefreshTokenDetail getRefreshTokenDetail(String refreshToken);
+
+    String getRefreshTokenByUserId(Long userId);
 }

@@ -216,6 +216,14 @@
         where
             refreshToken = #{refreshToken}
     </select>
+    <select id="getRefreshTokenByUserId" parameterType="java.lang.Long" resultType="java.lang.String">
+        select
+            refreshToken
+        from
+            t_refresh_token
+        where
+            userId = #{userId}
+    </select>
 
 
 </mapper>

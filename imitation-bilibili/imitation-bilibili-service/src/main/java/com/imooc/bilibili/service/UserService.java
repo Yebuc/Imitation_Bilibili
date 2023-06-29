@@ -83,7 +83,7 @@ public class UserService {
         String password = user.getPassword();
         String rawPassword;
         try{
-            rawPassword = RSAUtil.decrypt(password);
+            rawPassword = RSAUtil.decrypt(password);//密码解密
         }catch (Exception e){
             throw new ConditionException("密码解密失败！");
         }
@@ -198,4 +198,7 @@ public class UserService {
         return TokenUtil.generateToken(userId);
     }
 
+    public String getRefreshTokenByUserId(Long userId) {
+        return userDao.getRefreshTokenByUserId(userId);
+    }
 }

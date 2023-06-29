@@ -41,7 +41,7 @@ public class FastDFSUtil {
 
     private static final int SLICE_SIZE = 1024 * 1024 * 2;//大小为2MB
 
-//    @Value("${fdfs.http.storage-addr}")
+    @Value("${fdfs.http.storage-addr}")
     private String httpFdfsStorageAddr;
 
     public String getFileType(MultipartFile file){//获取文件类型方法
@@ -170,38 +170,40 @@ public class FastDFSUtil {
 
     public void viewVideoOnlineBySlices(HttpServletRequest request,
                                         HttpServletResponse response,
-                                        String path) throws Exception{
-        FileInfo fileInfo = fastFileStorageClient.queryFileInfo(DEFAULT_GROUP, path);
-        long totalFileSize = fileInfo.getFileSize();
+                                        String path) throws Exception{//视频文件在线播放，以分片的方式获取
+        FileInfo fileInfo = fastFileStorageClient.queryFileInfo(DEFAULT_GROUP, path);//path文文件的相对路径  获取文件的信息
+        long totalFileSize = fileInfo.getFileSize();//文件总大小
         String url = httpFdfsStorageAddr + path;
+        //获取请求头
         Enumeration<String> headerNames = request.getHeaderNames();
         Map<String, Object> headers = new HashMap<>();
         while(headerNames.hasMoreElements()){
             String header = headerNames.nextElement();
             headers.put(header, request.getHeader(header));
         }
+        //是否有分页范围   开始的结束的位置
         String rangeStr = request.getHeader("Range");
         String[] range;
-        if(StringUtil.isNullOrEmpty(rangeStr)){
+        if(StringUtil.isNullOrEmpty(rangeStr)){//如果range为0则赋值
             rangeStr = "bytes=0-" + (totalFileSize-1);
         }
-        range = rangeStr.split("bytes=|-");
+        range = rangeStr.split("bytes=|-");//拆分---将bytes= 起始位置  结束位置  进行的分离
         long begin = 0;
-        if(range.length >= 2){
+        if(range.length >= 2){//只有开始位置没有结束位置
             begin = Long.parseLong(range[1]);
         }
         long end = totalFileSize-1;
         if(range.length >= 3){
             end = Long.parseLong(range[2]);
         }
-        long len = (end - begin) + 1;
+        long len = (end - begin) + 1;//分片的长度
         String contentRange = "bytes " + begin + "-" + end + "/" + totalFileSize;
         response.setHeader("Content-Range", contentRange);
         response.setHeader("Accept-Ranges", "bytes");
         response.setHeader("Content-Type", "video/mp4");
-        response.setContentLength((int)len);
+        response.setContentLength((int)len);//内容长度
         response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-        HttpUtil.get(url, headers, response);
+        HttpUtil.get(url, headers, response);//通过HttpUtil从后端访问FastDFS文件服务器
     }
 
     //下载
