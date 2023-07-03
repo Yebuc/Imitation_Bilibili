@@ -30,7 +30,7 @@ public class Video {
 
     private String area;//分区
 
-    private List<VideoTag> videoTagList;//标签列表
+    private List<VideoTag> videoTagList;//标签列表  可以进行个性化的推荐与定制
 
 //    @Field(type = FieldType.Text)
     private String description;//简介

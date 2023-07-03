@@ -276,7 +276,7 @@ public class VideoService {
     public Map<String, Object> getVideoDetails(Long videoId) {
         Video video =  videoDao.getVideoDetails(videoId);
         Long userId = video.getUserId();
-        User user = userService.getUserInfo(userId);
+        User user = userService.getUserInfo(userId);//查到关联用户的信息
         UserInfo userInfo = user.getUserInfo();
         Map<String, Object> result = new HashMap<>();
         result.put("video", video);
