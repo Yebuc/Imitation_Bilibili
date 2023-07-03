@@ -42,9 +42,9 @@ public class WebSocketService {
 
     private Long userId;
 
-    private static ApplicationContext APPLICATION_CONTEXT;
+    private static ApplicationContext APPLICATION_CONTEXT;//通过ApplicationContext来获取相关的实体类与bean，从某些角度上解决了springBoot单例注入的弊端
 
-    public static void setApplicationContext(ApplicationContext applicationContext){
+    public static void setApplicationContext(ApplicationContext applicationContext){//在启动类ImoocBilibiliApp里面调用与赋值
         WebSocketService.APPLICATION_CONTEXT = applicationContext;
     }
 
@@ -71,7 +71,7 @@ public class WebSocketService {
     }
 
     @OnClose
-    public void closeConnection(){//关闭连接
+    public void closeConnection(){//关闭连接  关了视频就直接没有了
         if(WEBSOCKET_MAP.containsKey(sessionId)){
             WEBSOCKET_MAP.remove(sessionId);
             ONLINE_COUNT.getAndDecrement();
@@ -80,27 +80,30 @@ public class WebSocketService {
     }
 
     @OnMessage
-    public void onMessage(String message){//当有消息进行通信的时候
+    public void onMessage(String message){//当有消息进行通信的时候   这里的message不只是弹幕内容，还有一些弹幕相关的属性，由前端传送
         logger.info("用户信息：" + sessionId + "，报文：" + message);
         if(!StringUtil.isNullOrEmpty(message)){
             try{
-                //群发消息
-                for(Map.Entry<String, WebSocketService> entry : WEBSOCKET_MAP.entrySet()){
+                //群发消息          要使用并发+队列
+                for(Map.Entry<String, WebSocketService> entry : WEBSOCKET_MAP.entrySet()){//每一个客户端连接都有它的webSocketService----->多例模式
                     WebSocketService webSocketService = entry.getValue();
+                    //使用RocketMQ队列
                     DefaultMQProducer danmusProducer = (DefaultMQProducer)APPLICATION_CONTEXT.getBean("danmusProducer");
-                    JSONObject jsonObject = new JSONObject();
+                    JSONObject jsonObject = new JSONObject();//其实就可以当作一个map来用,,一个加强版的map
                     jsonObject.put("message", message);
-                    jsonObject.put("sessionId", webSocketService.getSessionId());
+                    jsonObject.put("sessionId", webSocketService.getSessionId());            //将jsonObject进行格式转化
                     Message msg = new Message(UserMomentsConstant.TOPIC_DANMUS, jsonObject.toJSONString().getBytes(StandardCharsets.UTF_8));
-                    RocketMQUtil.asyncSendMsg(danmusProducer, msg);
+                    RocketMQUtil.asyncSendMsg(danmusProducer, msg);//异步执行---RocketMQUtil里面封装好了
+//                    webSocketService.sendMessage(message);//群发消息  这一步放到RocketMQConfig中的120行---->由监听器处理，发送给前端客户端,完成消息的推送
                 }
                 if(this.userId != null){
-                    //保存弹幕到数据库
+                    //保存弹幕到数据库   需要使用异步去做
                     Danmu danmu = JSONObject.parseObject(message, Danmu.class);
                     danmu.setUserId(userId);
                     danmu.setCreateTime(new Date());
+                    //todo 还可以优化--->引入一个MQ消峰，再异步保存到数据库中进行持久化
                     DanmuService danmuService = (DanmuService)APPLICATION_CONTEXT.getBean("danmuService");
-                    danmuService.asyncAddDanmu(danmu);
+                    danmuService.asyncAddDanmu(danmu);//异步保存弹幕至数据库,不会占用主线程过多的时间
                     //保存弹幕到redis
                     danmuService.addDanmusToRedis(danmu);
                 }
@@ -115,7 +118,7 @@ public class WebSocketService {
     public void onError(Throwable error){//当发生错误的时候需要处理
     }
 
-    public void sendMessage(String message) throws IOException {//发送消息
+    public void sendMessage(String message) throws IOException {//将消息发送到前端 --->发送消息
         this.session.getBasicRemote().sendText(message);//发送文本
     }
 
@@ -127,8 +130,8 @@ public class WebSocketService {
             if(webSocketService.session.isOpen()){
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("onlineCount", ONLINE_COUNT.get());
-                jsonObject.put("msg", "当前在线人数为" + ONLINE_COUNT.get());
-                webSocketService.sendMessage(jsonObject.toJSONString());
+                jsonObject.put("msg", "当前在线人数为" + ONLINE_COUNT.get());//给前端的提示语--->可有可无其实
+                webSocketService.sendMessage(jsonObject.toJSONString());//转成json格式字符串
             }
         }
     }

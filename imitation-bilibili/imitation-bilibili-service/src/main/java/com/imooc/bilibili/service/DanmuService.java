@@ -29,14 +29,14 @@ public class DanmuService {
         danmuDao.addDanmu(danmu);
     }
 
-    @Async
+    @Async//异步注解
     public void asyncAddDanmu(Danmu danmu){
         danmuDao.addDanmu(danmu);
     }
 
     /**
      * 查询策略是优先查redis中的弹幕数据，
-     * 如果没有的话查询数据库，然后把查询的数据写入redis当中
+     * 如果没有的话查询数据库，然后把查询的数据写入redis当中并返给前端
      */
     public List<Danmu> getDanmus(Long videoId,
                                  String startTime, String endTime) throws Exception {
@@ -58,7 +58,7 @@ public class DanmuService {
                         childList.add(danmu);
                     }
                 }
-                list = childList;
+                list = childList;//如果是游客模式，就会直接返回一个空的list
             }
         }else{
             Map<String, Object> params = new HashMap<>();
@@ -72,8 +72,8 @@ public class DanmuService {
         return list;
     }
 
-    public void addDanmusToRedis(Danmu danmu) {
-        String key = DANMU_KEY + danmu.getVideoId();
+    public void addDanmusToRedis(Danmu danmu) {//添加弹幕到Redis
+        String key = DANMU_KEY + danmu.getVideoId();//当前用户所发的弹幕
         String value = redisTemplate.opsForValue().get(key);
         List<Danmu> list = new ArrayList<>();
         if(!StringUtil.isNullOrEmpty(value)){

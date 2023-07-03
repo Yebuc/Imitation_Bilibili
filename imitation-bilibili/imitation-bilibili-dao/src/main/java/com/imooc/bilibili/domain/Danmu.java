@@ -12,7 +12,7 @@ public class Danmu {
 
     private String content;
 
-    private String danmuTime;
+    private String danmuTime;//弹幕出现的时间,在视频播放过程中多久开始出现该弹幕
 
     private Date createTime;
 

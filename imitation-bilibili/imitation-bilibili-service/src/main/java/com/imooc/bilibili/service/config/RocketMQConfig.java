@@ -7,6 +7,7 @@ import com.imooc.bilibili.domain.UserMoment;
 import com.imooc.bilibili.domain.constant.UserMomentsConstant;
 import com.imooc.bilibili.service.UserFollowingService;
 //import com.imooc.bilibili.service.websocket.WebSocketService;
+import com.imooc.bilibili.service.websocket.WebSocketService;
 import io.netty.util.internal.StringUtil;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
@@ -84,7 +85,7 @@ public class RocketMQConfig {
         return consumer;
     }
 
-    @Bean("danmusProducer")
+    @Bean("danmusProducer")//弹幕生产者
     public DefaultMQProducer danmusProducer() throws Exception{
         // 实例化消息生产者Producer
         DefaultMQProducer producer = new DefaultMQProducer(UserMomentsConstant.GROUP_DANMUS);
@@ -95,38 +96,38 @@ public class RocketMQConfig {
         return producer;
     }
 
-//    @Bean("danmusConsumer")
-//    public DefaultMQPushConsumer danmusConsumer() throws Exception{
-//        // 实例化消费者
-//        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(UserMomentsConstant.GROUP_DANMUS);
-//        // 设置NameServer的地址
-//        consumer.setNamesrvAddr(nameServerAddr);
-//        // 订阅一个或者多个Topic，以及Tag来过滤需要消费的消息
-//        consumer.subscribe(UserMomentsConstant.TOPIC_DANMUS, "*");
-//        // 注册回调实现类来处理从broker拉取回来的消息
-//        consumer.registerMessageListener(new MessageListenerConcurrently() {
-//            @Override
-//            public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
-//                MessageExt msg = msgs.get(0);
-//                byte[] msgByte = msg.getBody();
-//                String bodyStr = new String(msgByte);
-//                JSONObject jsonObject = JSONObject.parseObject(bodyStr);
-//                String sessionId = jsonObject.getString("sessionId");
-//                String message = jsonObject.getString("message");
-//                WebSocketService webSocketService = WebSocketService.WEBSOCKET_MAP.get(sessionId);
-//                if(webSocketService.getSession().isOpen()){
-//                    try {
-//                        webSocketService.sendMessage(message);
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//                // 标记该消息已经被成功消费
-//                return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
-//            }
-//        });
-//        // 启动消费者实例
-//        consumer.start();
-//        return consumer;
-//    }
+    @Bean("danmusConsumer")//弹幕消费者
+    public DefaultMQPushConsumer danmusConsumer() throws Exception{
+        // 实例化消费者
+        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(UserMomentsConstant.GROUP_DANMUS);
+        // 设置NameServer的地址
+        consumer.setNamesrvAddr(nameServerAddr);
+        // 订阅一个或者多个Topic，以及Tag来过滤需要消费的消息
+        consumer.subscribe(UserMomentsConstant.TOPIC_DANMUS, "*");
+        // 注册回调实现类来处理从broker拉取回来的消息
+        consumer.registerMessageListener(new MessageListenerConcurrently() {
+            @Override
+            public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
+                MessageExt msg = msgs.get(0);
+                byte[] msgByte = msg.getBody();
+                String bodyStr = new String(msgByte);
+                JSONObject jsonObject = JSONObject.parseObject(bodyStr);
+                String sessionId = jsonObject.getString("sessionId");
+                String message = jsonObject.getString("message");//还是json的格式，从前端传过来的
+                WebSocketService webSocketService = WebSocketService.WEBSOCKET_MAP.get(sessionId);
+                if(webSocketService.getSession().isOpen()){
+                    try {
+                        webSocketService.sendMessage(message);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                // 标记该消息已经被成功消费
+                return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+            }
+        });
+        // 启动消费者实例
+        consumer.start();
+        return consumer;
+    }
 }

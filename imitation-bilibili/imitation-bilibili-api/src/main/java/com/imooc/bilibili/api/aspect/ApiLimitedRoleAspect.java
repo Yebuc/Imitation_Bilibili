@@ -29,7 +29,7 @@ public class ApiLimitedRoleAspect {
     @Autowired
     private UserRoleService userRoleService;
 
-    //切点
+    //切点  在UserMomentsApi中的addUserMoments接口里使用了
     @Pointcut("@annotation(com.imooc.bilibili.domain.annotation.ApiLimitedRole)")//告诉springboot应该什么时候进行切入  在执行ApiLimitedRole注解的时候进行切入
     public void check(){
     }

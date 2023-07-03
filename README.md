@@ -327,7 +327,11 @@ MQ的特点是**异步、解耦和削峰**
 
 
 
-springBoot当中，依赖注入默认使用的是单例模式。使用websocket时，当一个客户端来连接时就需要新生成一个新的websocketService，如此是一个多例模式。对于多例模式，需要通过一个ConcurrentHashMap类，将每个客户端唯一的key来存储该客户端对应生成的webSocketService。
+##### 多例模式下bean注入问题的解决
+
+```md
+springBoot当中，依赖注入默认使用的是单例模式。使用websocket时，当一个客户端来连接时就需要新生成一个新的websocketService，如此是一个多例模式。对于多例模式，需要通过一个ConcurrentHashMap类，将每个客户端唯一的key来存储该客户端对应生成的webSocketService。**所以注意哦**在多例模式注入Bean的情况下，使用@Autowired自动注入的话是会出问题的。因为默认是单例注入，如果第二个客户端请求过去去请求不到已经注入过的bean的，会为null。----->可以通过ApplicationContext来获取相关的实体类与bean，从某些角度上解决了springBoot单例注入的弊端
+```
 
 
 
@@ -335,7 +339,15 @@ springBoot当中，依赖注入默认使用的是单例模式。使用websocket�
 
 比如服务端想推送消息给客户端
 
+```md
 首先通过客户端的唯一标识--->从ConcurrentHashMap中取到该和客户端相对应的WebSocketService--->而在每个WebSocketService中保存了对应与当次连接的一个Session--->再通过Session的一些相关方法得以与该客户端通信
+```
+
+
+
+
+
+
 
 
 
