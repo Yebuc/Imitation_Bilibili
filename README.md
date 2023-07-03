@@ -188,6 +188,56 @@ spring.servlet.multipart.max-request-size=500MB
 
 
 
+##### 视频评论
+
+```md
+使用树形结构存储设计表----闭包表
+DROP TABLE IF EXISTS `t_video_comment`;
+CREATE TABLE `t_video_comment`  (
+ `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `videoId` bigint NOT NULL COMMENT '视频id',
+  `userId` bigint NOT NULL COMMENT '用户id',
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '评论',
+  `replyUserId` bigint NULL DEFAULT NULL COMMENT '回复用户id',
+  `rootId` bigint NULL DEFAULT NULL COMMENT '根节点评论id',
+  `createTime` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `updateTime` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '视频评论表' ROW_FORMAT = Dynamic;
+```
+
+接收视频评论的实体类VideoComment中，需要有三个冗余字段，以此来接收孩子评论(即回复评论)，已经要回复user的简介和用户本身的简介。
+
+![image-20230630114155671](C:\Users\Amber\AppData\Roaming\Typora\typora-user-images\image-20230630114155671.png)
+
+##### 记得动态SQL的拼接调节与使用
+
+![image-20230703110438599](C:\Users\Amber\AppData\Roaming\Typora\typora-user-images\image-20230703110438599.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -160,37 +160,37 @@ public class VideoApi {
     /**
      * 添加视频评论
      */
-//    @PostMapping("/video-comments")
-//    public JsonResponse<String> addVideoComment(@RequestBody VideoComment videoComment){
-//        Long userId = userSupport.getCurrentUserId();
-//        videoService.addVideoComment(videoComment, userId);
-//        return JsonResponse.success();
-//    }
+    @PostMapping("/video-comments")
+    public JsonResponse<String> addVideoComment(@RequestBody VideoComment videoComment){
+        Long userId = userSupport.getCurrentUserId();
+        videoService.addVideoComment(videoComment, userId);
+        return JsonResponse.success();
+    }
 
     /**
      * 分页查询视频评论
      */
-//    @GetMapping("/video-comments")
-//    public JsonResponse<PageResult<VideoComment>> pageListVideoComments(@RequestParam Integer size,
-//                                                                        @RequestParam Integer no,
-//                                                                        @RequestParam Long videoId){
-//        PageResult<VideoComment> result = videoService.pageListVideoComments(size, no, videoId);
-//        return new JsonResponse<>(result);
-//    }
+    @GetMapping("/video-comments")
+    public JsonResponse<PageResult<VideoComment>> pageListVideoComments(@RequestParam Integer size,//@RequestParam表示必传参数
+                                                                        @RequestParam Integer no,
+                                                                        @RequestParam Long videoId){
+        PageResult<VideoComment> result = videoService.pageListVideoComments(size, no, videoId);
+        return new JsonResponse<>(result);
+    }
 
     /**
      * 获取视频详情
      */
-//    @GetMapping("/video-details")
-//    public JsonResponse<Map<String, Object>> getVideoDetails(@RequestParam Long videoId){
-//        Map<String, Object> result = videoService.getVideoDetails(videoId);
-//        return new JsonResponse<>(result);
-//    }
+    @GetMapping("/video-details")
+    public JsonResponse<Map<String, Object>> getVideoDetails(@RequestParam Long videoId){
+        Map<String, Object> result = videoService.getVideoDetails(videoId);
+        return new JsonResponse<>(result);
+    }
 
     /**
      * 添加视频观看记录
      */
-//    @PostMapping("/video-views")
+//    @PostMapping("/video-views")//VideoView中的clientID是什么意思？
 //    public JsonResponse<String> addVideoView(@RequestBody VideoView videoView,
 //                                             HttpServletRequest request){
 //        Long userId;

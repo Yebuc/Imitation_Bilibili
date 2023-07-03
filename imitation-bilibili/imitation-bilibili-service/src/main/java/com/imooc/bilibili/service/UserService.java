@@ -201,4 +201,8 @@ public class UserService {
     public String getRefreshTokenByUserId(Long userId) {
         return userDao.getRefreshTokenByUserId(userId);
     }
+
+    public List<UserInfo> batchGetUserInfoByUserIds(Set<Long> userIdList) {//批量获取用户信息，通过userId
+        return userDao.batchGetUserInfoByUserIds(userIdList);
+    }
 }

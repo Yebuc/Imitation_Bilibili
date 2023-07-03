@@ -225,5 +225,16 @@
             userId = #{userId}
     </select>
 
+    <select id="batchGetUserInfoByUserIds" resultType="com.imooc.bilibili.domain.UserInfo">
+        select
+        *
+        from
+        t_user_info
+        where
+        userId in
+        <foreach collection="userIdList" item="userId" open="(" close=")" separator=",">
+            #{userId}
+        </foreach>
+    </select>
 
 </mapper>

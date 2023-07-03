@@ -27,6 +27,7 @@ import com.imooc.bilibili.service.util.FastDFSUtil;
 //import org.bytedeco.javacv.Frame;
 //import org.bytedeco.javacv.Java2DFrameConverter;
 //import com.imooc.bilibili.service.util.ImageUtil;
+import com.imooc.bilibili.service.util.IpUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -215,79 +216,80 @@ public class VideoService {
         result.put("like", like);
         return result;
     }
-//
-//    public void addVideoComment(VideoComment videoComment, Long userId) {
-//        Long videoId = videoComment.getVideoId();
-//        if(videoId == null){
-//            throw new ConditionException("参数异常！");
-//        }
-//        Video video = videoDao.getVideoById(videoId);
-//        if(video == null){
-//            throw new ConditionException("非法视频！");
-//        }
-//        videoComment.setUserId(userId);
-//        videoComment.setCreateTime(new Date());
-//        videoDao.addVideoComment(videoComment);
-//    }
-//
-//    public PageResult<VideoComment> pageListVideoComments(Integer size, Integer no, Long videoId) {
-//        Video video = videoDao.getVideoById(videoId);
-//        if(video == null){
-//            throw new ConditionException("非法视频！");
-//        }
-//        Map<String, Object> params = new HashMap<>();
-//        params.put("start", (no-1)*size);
-//        params.put("limit", size);
-//        params.put("videoId", videoId);
-//        Integer total = videoDao.pageCountVideoComments(params);
-//        List<VideoComment> list = new ArrayList<>();
-//        if(total > 0){
-//            list = videoDao.pageListVideoComments(params);
-//            //批量查询二级评论
-//            List<Long> parentIdList = list.stream().map(VideoComment::getId).collect(Collectors.toList());
-//            List<VideoComment> childCommentList = videoDao.batchGetVideoCommentsByRootIds(parentIdList);
-//            //批量查询用户信息
-//            Set<Long> userIdList = list.stream().map(VideoComment::getUserId).collect(Collectors.toSet());
-//            Set<Long> replyUserIdList = childCommentList.stream().map(VideoComment::getUserId).collect(Collectors.toSet());
-//            Set<Long> childUserIdList = childCommentList.stream().map(VideoComment::getReplyUserId).collect(Collectors.toSet());
-//            userIdList.addAll(replyUserIdList);
-//            userIdList.addAll(childUserIdList);
-//            List<UserInfo> userInfoList = userService.batchGetUserInfoByUserIds(userIdList);
-//            Map<Long, UserInfo> userInfoMap = userInfoList.stream().collect(Collectors.toMap(UserInfo :: getUserId, userInfo -> userInfo));
-//            list.forEach(comment -> {
-//                Long id = comment.getId();
-//                List<VideoComment> childList = new ArrayList<>();
-//                childCommentList.forEach(child -> {
-//                    if(id.equals(child.getRootId())){
-//                        child.setUserInfo(userInfoMap.get(child.getUserId()));
-//                        child.setReplyUserInfo(userInfoMap.get(child.getReplyUserId()));
-//                        childList.add(child);
-//                    }
-//                });
-//                comment.setChildList(childList);
-//                comment.setUserInfo(userInfoMap.get(comment.getUserId()));
-//            });
-//        }
-//        return new PageResult<>(total, list);
-//    }
-//
-//    public Map<String, Object> getVideoDetails(Long videoId) {
-//        Video video =  videoDao.getVideoDetails(videoId);
-//        Long userId = video.getUserId();
-//        User user = userService.getUserInfo(userId);
-//        UserInfo userInfo = user.getUserInfo();
-//        Map<String, Object> result = new HashMap<>();
-//        result.put("video", video);
-//        result.put("userInfo", userInfo);
-//        return result;
-//    }
-//
+
+    public void addVideoComment(VideoComment videoComment, Long userId) {//添加视频评论
+        Long videoId = videoComment.getVideoId();
+        if(videoId == null){
+            throw new ConditionException("参数异常！");
+        }
+        Video video = videoDao.getVideoById(videoId);
+        if(video == null){
+            throw new ConditionException("非法视频！");
+        }
+        videoComment.setUserId(userId);
+        videoComment.setCreateTime(new Date());
+        videoDao.addVideoComment(videoComment);
+    }
+
+    public PageResult<VideoComment> pageListVideoComments(Integer size, Integer no, Long videoId) {//分页查询视频评论
+        Video video = videoDao.getVideoById(videoId);
+        if(video == null){
+            throw new ConditionException("非法视频！");
+        }
+        Map<String, Object> params = new HashMap<>();
+        params.put("start", (no-1)*size);
+        params.put("limit", size);
+        params.put("videoId", videoId);
+        Integer total = videoDao.pageCountVideoComments(params);
+
+        List<VideoComment> list = new ArrayList<>();
+        if(total > 0){
+            list = videoDao.pageListVideoComments(params);//查询一级评论
+            //批量查询二级评论
+            List<Long> parentIdList = list.stream().map(VideoComment::getId).collect(Collectors.toList());//先找出所有视频评论的parentId，组成一个list
+            List<VideoComment> childCommentList = videoDao.batchGetVideoCommentsByRootIds(parentIdList);//根据查询到的parentId，找到相应的孩子评论List  二级评论
+            //批量查询用户信息
+            Set<Long> userIdList = list.stream().map(VideoComment::getUserId).collect(Collectors.toSet());//创建视频本身的UserId列表  SET可以字段的去重
+            Set<Long> replyUserIdList = childCommentList.stream().map(VideoComment::getUserId).collect(Collectors.toSet());//要回复的UserId列表
+            Set<Long> childUserIdList = childCommentList.stream().map(VideoComment::getReplyUserId).collect(Collectors.toSet());//当前二级评论的userId列表
+            userIdList.addAll(replyUserIdList);
+            userIdList.addAll(childUserIdList);
+            List<UserInfo> userInfoList = userService.batchGetUserInfoByUserIds(userIdList);
+            Map<Long, UserInfo> userInfoMap = userInfoList.stream().collect(Collectors.toMap(UserInfo :: getUserId, userInfo -> userInfo));
+            list.forEach(comment -> {//遍历一级评论列表
+                Long id = comment.getId();
+                List<VideoComment> childList = new ArrayList<>();
+                childCommentList.forEach(child -> {
+                    if(id.equals(child.getRootId())){
+                        child.setUserInfo(userInfoMap.get(child.getUserId()));//赋值二级评论
+                        child.setReplyUserInfo(userInfoMap.get(child.getReplyUserId()));//赋值二级评论
+                        childList.add(child);//赋值二级评论
+                    }
+                });
+                comment.setChildList(childList);
+                comment.setUserInfo(userInfoMap.get(comment.getUserId()));//注意哦是UserInfo，此时的comment为一级评论，是没有根评论的
+            });
+        }
+        return new PageResult<>(total, list);
+    }
+
+    public Map<String, Object> getVideoDetails(Long videoId) {
+        Video video =  videoDao.getVideoDetails(videoId);
+        Long userId = video.getUserId();
+        User user = userService.getUserInfo(userId);
+        UserInfo userInfo = user.getUserInfo();
+        Map<String, Object> result = new HashMap<>();
+        result.put("video", video);
+        result.put("userInfo", userInfo);
+        return result;
+    }
+
 //    public void addVideoView(VideoView videoView, HttpServletRequest request) {
 //        Long userId = videoView.getUserId();
 //        Long videoId = videoView.getVideoId();
 //        //生成clientId
 //        String agent = request.getHeader("User-Agent");
-//        UserAgent userAgent = UserAgent.parseUserAgentString(agent);
+//        UserAgent userAgent = UserAgent.parseUserAgentString(agent);//缺一个VideoView表设计，和UserAgent的引入
 //        String clientId = String.valueOf(userAgent.getId());
 //        String ip = IpUtil.getIP(request);
 //        Map<String, Object> params = new HashMap<>();
@@ -310,7 +312,7 @@ public class VideoService {
 //            videoDao.addVideoView(videoView);
 //        }
 //    }
-//
+
 //    public Integer getVideoViewCounts(Long videoId) {
 //        return videoDao.getVideoViewCounts(videoId);
 //    }
