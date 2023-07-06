@@ -229,28 +229,28 @@ public class VideoApi {
     /**
      * 视频帧截取生成黑白剪影
      */
-//    @GetMapping("/video-frames")
-//    public JsonResponse<List<VideoBinaryPicture>> captureVideoFrame(@RequestParam Long videoId,
-//                                                                    @RequestParam String fileMd5) throws Exception {
-//        List<VideoBinaryPicture> list = videoService.convertVideoToImage(videoId, fileMd5);
-//        return new JsonResponse<>(list);
-//    }
-//
-//    /**
-//     * 查询视频黑白剪影
-//     */
-//    @GetMapping("/video-binary-images")
-//    public JsonResponse<List<VideoBinaryPicture>> getVideoBinaryImages(@RequestParam Long videoId,
-//                                                                       Long videoTimestamp,
-//                                                                       String frameNo) {
-//        Map<String, Object> params = new HashMap<>();
-//        params.put("videoId", videoId);
-//        params.put("videoTimestamp", videoTimestamp);
-//        params.put("frameNo", frameNo);
-//        List<VideoBinaryPicture> list = videoService.getVideoBinaryImages(params);
-//        return new JsonResponse<>(list);
-//    }
-//
+    @GetMapping("/video-frames")
+    public JsonResponse<List<VideoBinaryPicture>> captureVideoFrame(@RequestParam Long videoId,
+                                                                    @RequestParam String fileMd5) throws Exception {//fileMd5--->对文件进行md5加密之后生成的一个字符串
+        List<VideoBinaryPicture> list = videoService.convertVideoToImage(videoId, fileMd5);
+        return new JsonResponse<>(list);
+    }
+
+    /**
+     * 查询视频黑白剪影
+     */
+    @GetMapping("/video-binary-images")
+    public JsonResponse<List<VideoBinaryPicture>> getVideoBinaryImages(@RequestParam Long videoId,
+                                                                       Long videoTimestamp,
+                                                                       String frameNo) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("videoId", videoId);
+        params.put("videoTimestamp", videoTimestamp);
+        params.put("frameNo", frameNo);
+        List<VideoBinaryPicture> list = videoService.getVideoBinaryImages(params);
+        return new JsonResponse<>(list);
+    }
+
 //    /**
 //     * 查询视频标签
 //     */

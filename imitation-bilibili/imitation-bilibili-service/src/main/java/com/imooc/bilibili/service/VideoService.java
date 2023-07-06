@@ -6,6 +6,7 @@ import com.imooc.bilibili.domain.exception.ConditionException;
 import com.imooc.bilibili.service.util.FastDFSUtil;
 //import com.imooc.bilibili.service.util.ImageUtil;
 //import com.imooc.bilibili.service.util.IpUtil;
+import com.imooc.bilibili.service.util.ImageUtil;
 import eu.bitwalker.useragentutils.UserAgent;
 //import org.apache.mahout.cf.taste.common.TasteException;
 //import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
@@ -29,7 +30,7 @@ import org.apache.mahout.cf.taste.model.DataModel;
 //import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 //import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 //import org.bytedeco.javacv.FFmpegFrameGrabber;
-//import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.Frame;
 //import org.bytedeco.javacv.Java2DFrameConverter;
 //import com.imooc.bilibili.service.util.ImageUtil;
 import com.imooc.bilibili.service.util.IpUtil;
@@ -44,6 +45,8 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
+import org.bytedeco.javacv.FFmpegFrameGrabber;
+import org.bytedeco.javacv.Java2DFrameConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,8 +78,8 @@ public class VideoService {
     @Autowired
     private UserService userService;
 
-//    @Autowired
-//    private ImageUtil imageUtil;
+    @Autowired
+    private ImageUtil imageUtil;
 
     @Autowired
     private FileService fileService;
@@ -396,55 +399,56 @@ public class VideoService {
         return new GenericDataModel(fastByIdMap);
     }
 
-//    public List<VideoBinaryPicture> convertVideoToImage(Long videoId, String fileMd5) throws Exception{
-//        com.imooc.bilibili.domain.File file = fileService.getFileByMd5(fileMd5);
-//        String filePath = "/Users/hat/tmpfile/fileForVideoId" + videoId + "." + file.getType();
-//        fastDFSUtil.downLoadFile(file.getUrl(), filePath);
-//        FFmpegFrameGrabber fFmpegFrameGrabber = FFmpegFrameGrabber.createDefault(filePath);
-//        fFmpegFrameGrabber.start();
-//        int ffLength = fFmpegFrameGrabber.getLengthInFrames();
-//        Frame frame;
-//        Java2DFrameConverter converter = new Java2DFrameConverter();
-//        int count = 1;
-//        List<VideoBinaryPicture> pictures = new ArrayList<>();
-//        for(int i=1; i<= ffLength; i ++){
-//            long timestamp = fFmpegFrameGrabber.getTimestamp();
-//            frame = fFmpegFrameGrabber.grabImage();
-//            if(count == i){
-//                if(frame == null){
-//                    throw new ConditionException("无效帧");
-//                }
-//                BufferedImage bufferedImage = converter.getBufferedImage(frame);
-//                ByteArrayOutputStream os = new ByteArrayOutputStream();
-//                ImageIO.write(bufferedImage, "png", os);
-//                InputStream inputStream = new ByteArrayInputStream(os.toByteArray());
-//                //输出黑白剪影文件
-//                File outputFile = File.createTempFile("convert-" + videoId + "-", ".png");
-//                BufferedImage binaryImg = imageUtil.getBodyOutline(bufferedImage, inputStream);
-//                ImageIO.write(binaryImg, "png", outputFile);
-//                //有的浏览器或网站需要把图片白色的部分转为透明色，使用以下方法可实现
-//                imageUtil.transferAlpha(outputFile, outputFile);
-//                //上传视频剪影文件
-//                String imgUrl = fastDFSUtil.uploadCommonFile(outputFile, "png");
-//                VideoBinaryPicture videoBinaryPicture = new VideoBinaryPicture();
-//                videoBinaryPicture.setFrameNo(i);
-//                videoBinaryPicture.setUrl(imgUrl);
-//                videoBinaryPicture.setVideoId(videoId);
-//                videoBinaryPicture.setVideoTimestamp(timestamp);
-//                pictures.add(videoBinaryPicture);
-//                count += FRAME_NO;
-//                //删除临时文件
-//                outputFile.delete();
-//            }
-//        }
-//        //删除临时文件
-//        File tmpFile = new File(filePath);
-//        tmpFile.delete();
-//        //批量添加视频剪影文件
-//        videoDao.batchAddVideoBinaryPictures(pictures);
-//        return pictures;
-//    }
-//
+    public List<VideoBinaryPicture> convertVideoToImage(Long videoId, String fileMd5) throws Exception{//视频帧截取生成黑白剪影
+        com.imooc.bilibili.domain.File file = fileService.getFileByMd5(fileMd5);
+        String filePath = "/Users/hat/tmpfile/fileForVideoId" + videoId + "." + file.getType();
+        fastDFSUtil.downLoadFile(file.getUrl(), filePath);//再下载一次，在分布式上的处理方式，先下载到本地的路径当中
+        FFmpegFrameGrabber fFmpegFrameGrabber = FFmpegFrameGrabber.createDefault(filePath);//javaCV中通过文件的路径直接生成一个相关对应的实体类
+        fFmpegFrameGrabber.start();//开启
+        int ffLength = fFmpegFrameGrabber.getLengthInFrames();//获取该视频总帧数
+        Frame frame;//每一帧用一个frame存储
+        Java2DFrameConverter converter = new Java2DFrameConverter();//帧转换器   将帧转换为需要的文件类
+        int count = 1;//计数器
+        List<VideoBinaryPicture> pictures = new ArrayList<>();//视频黑白图列表
+        for(int i=1; i<= ffLength; i ++){
+            long timestamp = fFmpegFrameGrabber.getTimestamp();//当前帧的时间戳  后续需要保存在视频的picture当中的---黑白图当中
+            frame = fFmpegFrameGrabber.grabImage();//截取每一帧变为图片
+            if(count == i){//当前遍历数是否等于当前帧数
+                if(frame == null){
+                    throw new ConditionException("无效帧");
+                }
+                BufferedImage bufferedImage = converter.getBufferedImage(frame);
+                ByteArrayOutputStream os = new ByteArrayOutputStream();
+                ImageIO.write(bufferedImage, "png", os);//输出流，转换为png模式
+                InputStream inputStream = new ByteArrayInputStream(os.toByteArray());//转换为输入流
+                //输出黑白剪影文件
+                File outputFile = File.createTempFile("convert-" + videoId + "-", ".png");
+
+                BufferedImage binaryImg = imageUtil.getBodyOutline(bufferedImage, inputStream);
+                ImageIO.write(binaryImg, "png", outputFile);
+                //有的浏览器或网站需要把图片白色的部分转为透明色，使用以下方法可实现
+                imageUtil.transferAlpha(outputFile, outputFile);
+                //上传视频剪影文件
+                String imgUrl = fastDFSUtil.uploadCommonFile(outputFile, "png");
+                VideoBinaryPicture videoBinaryPicture = new VideoBinaryPicture();
+                videoBinaryPicture.setFrameNo(i);
+                videoBinaryPicture.setUrl(imgUrl);
+                videoBinaryPicture.setVideoId(videoId);
+                videoBinaryPicture.setVideoTimestamp(timestamp);
+                pictures.add(videoBinaryPicture);
+                count += FRAME_NO;//每隔多少帧进行截取，减轻系统的压力
+                //删除临时文件
+                outputFile.delete();
+            }
+        }
+        //删除临时文件
+        File tmpFile = new File(filePath);
+        tmpFile.delete();
+        //批量添加视频剪影文件
+        videoDao.batchAddVideoBinaryPictures(pictures);
+        return pictures;
+    }
+
 //    public List<VideoTag> getVideoTagsByVideoId(Long videoId) {
 //        return videoDao.getVideoTagsByVideoId(videoId);
 //    }
@@ -453,7 +457,7 @@ public class VideoService {
 //        videoDao.deleteVideoTags(tagIdList, videoId);
 //    }
 //
-//    public List<VideoBinaryPicture> getVideoBinaryImages(Map<String, Object> params) {
-//        return videoDao.getVideoBinaryImages(params);
-//    }
+    public List<VideoBinaryPicture> getVideoBinaryImages(Map<String, Object> params) {
+        return videoDao.getVideoBinaryImages(params);
+    }
 }

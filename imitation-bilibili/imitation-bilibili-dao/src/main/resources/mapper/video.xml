@@ -345,41 +345,41 @@
             </foreach>
     </select>
 
-<!--    <insert id="batchAddVideoBinaryPictures" parameterType="java.util.List">-->
-<!--        insert into-->
-<!--            t_video_binary_picture(-->
-<!--                videoId,-->
-<!--                frameNo,-->
-<!--                url,-->
-<!--                videoTimestamp,-->
-<!--                createTime-->
-<!--            )-->
-<!--            values-->
-<!--            <foreach collection="pictureList" item="picture" separator=",">-->
-<!--                (-->
-<!--                    #{picture.videoId},-->
-<!--                    #{picture.frameNo},-->
-<!--                    #{picture.url},-->
-<!--                    #{picture.videoTimestamp},-->
-<!--                    #{picture.createTime}-->
-<!--                )-->
-<!--            </foreach>-->
-<!--    </insert>-->
+    <insert id="batchAddVideoBinaryPictures" parameterType="java.util.List">
+        insert into
+            t_video_binary_picture(
+                videoId,
+                frameNo,
+                url,
+                videoTimestamp,
+                createTime
+            )
+            values
+            <foreach collection="pictureList" item="picture" separator=",">
+                (
+                    #{picture.videoId},
+                    #{picture.frameNo},
+                    #{picture.url},
+                    #{picture.videoTimestamp},
+                    #{picture.createTime}
+                )
+            </foreach>
+    </insert>
 
-<!--    <select id="getVideoBinaryImages" parameterType="java.util.Map" resultType="com.imooc.bilibili.domain.VideoBinaryPicture">-->
-<!--        select-->
-<!--            *-->
-<!--        from-->
-<!--            t_video_binary_picture-->
-<!--        where-->
-<!--            videoId = #{videoId}-->
-<!--            <if test="frameNo != null and frameNo != '' ">-->
-<!--                and frameNo = #{frameNo}-->
-<!--            </if>-->
-<!--            <if test="videoTimestamp != null">-->
-<!--                and videoTimestamp = #{videoTimestamp}-->
-<!--            </if>-->
-<!--    </select>-->
+    <select id="getVideoBinaryImages" parameterType="java.util.Map" resultType="com.imooc.bilibili.domain.VideoBinaryPicture">
+        select
+            *
+        from
+            t_video_binary_picture
+        where
+            videoId = #{videoId}
+            <if test="frameNo != null and frameNo != '' ">
+                and frameNo = #{frameNo}
+            </if>
+            <if test="videoTimestamp != null">
+                and videoTimestamp = #{videoTimestamp}
+            </if>
+    </select>
 
 <!--    <select id="getVideoTagsByVideoId" parameterType="java.lang.Long" resultType="com.imooc.bilibili.domain.VideoTag">-->
 <!--        select-->

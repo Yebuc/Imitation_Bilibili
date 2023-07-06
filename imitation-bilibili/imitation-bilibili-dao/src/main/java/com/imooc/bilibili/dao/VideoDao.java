@@ -68,12 +68,12 @@ public interface VideoDao {
 
     List<Video> batchGetVideosByIds(@Param("idList") List<Long> idList);
 
-//    Integer batchAddVideoBinaryPictures(@Param("pictureList") List<VideoBinaryPicture> pictureList);
-//
+    Integer batchAddVideoBinaryPictures(@Param("pictureList") List<VideoBinaryPicture> pictureList);
+
 //    List<VideoTag> getVideoTagsByVideoId(Long videoId);
 //
 //    Integer deleteVideoTags(@Param("tagIdList") List<Long> tagIdList,
 //                            @Param("videoId") Long videoId);
 //
-//    List<VideoBinaryPicture> getVideoBinaryImages(Map<String, Object> params);
+    List<VideoBinaryPicture> getVideoBinaryImages(Map<String, Object> params);
 }

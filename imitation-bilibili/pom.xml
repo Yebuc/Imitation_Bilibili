@@ -138,6 +138,19 @@
             </exclusions>
         </dependency>
 
+        <dependency><!--图像处理的包-->
+            <groupId>org.bytedeco</groupId>
+            <artifactId>javacv</artifactId>
+            <version>1.4.3</version>
+        </dependency>
+
+        <dependency><!--图像处理的包-->
+            <groupId>org.bytedeco.javacpp-presets</groupId>
+            <artifactId>ffmpeg-platform</artifactId>
+            <version>4.0.2-1.4.3</version>
+        </dependency>
+
+
     </dependencies>
 
 
