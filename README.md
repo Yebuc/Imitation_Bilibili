@@ -347,6 +347,132 @@ springBoot当中，依赖注入默认使用的是单例模式。使用websocket�
 
 
 
+#### 接入ElasticSearch、可视化Kibana
+
+##### 优势
+
+```md
+在传统的行与列构建的关系型数据库当中，在存储内容、格式复杂的数据上是非常不灵活的(如json格式的数据，我们需要把json里的对象每行每列进行拆分，保存至多张表里面，这样开起来就稍许麻烦了)，如果我们要构建一个完整的数据样例往往需要多张数据库表的连接下进行多表查询，得到结果之后得再构建一个比较庞大的Object对象
+
+如果我们可以将对象按照对象的方式来存储，这样我们就能更加专注于使用数据，重新利用对象的灵活性。
+
+JSON是一种以人可读的、文本表示对象的方法。它已经编程NoSQL师姐交换数据的事实标准。
+
+
+而在ElasticSearch当中，可以直接使用json的格式存储数据，通过ElasticSearch所提供的功能对json数据全文内容进行全文搜索，可以有效的提升搜索的效率以及搜索的维度与范围。
+```
+
+
+
+##### SpringBoot接入ES步骤
+
+第一步引入依赖：
+
+```xml
+<dependency><!--springframework自带的一个操作ES的依赖-->
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+            <version>2.5.1</version>
+</dependency>
+```
+
+第二步创建一个关于ElasticSearch的配置类，配置类中创建一个ESClient客户端。注意要和Service存在一个项目下。  也叫做连接类
+
+```java
+@Configuration
+public class ElasticSearchConfig extends AbstractElasticsearchConfiguration {
+
+    @Value("${elasticsearch.url}")//在properties里配置号ES的url（要包括端口号）
+    private String esUrl;
+
+    @Override
+    @Bean
+    public RestHighLevelClient elasticsearchClient(){//ES封装的一个通过Restfull格式的方法去访问ES相关API的客户端
+        final ClientConfiguration clientConfiguration = ClientConfiguration.builder()
+                .connectedTo(esUrl)
+                .build();
+        return RestClients.create(clientConfiguration).rest();//返回一个可以直接调用ES相关API的对象
+    }
+}
+```
+
+第三步需要创建一个类似于在操作数据库的时候DAO角色的一个接口类，我暂且把它叫做repositoy，在DAO层，于dao在一个层面。
+
+```java
+public interface VideoRepository extends ElasticsearchRepository<Video, Long> {//需要继承ElasticsearchRepository接口
+
+    Video findByTitleLike(String keyword);
+}
+```
+
+第四步可以直接使用VideoRepository实例化videoRepository因为其继承了ElasticsearchRepository父类接口，拥有了一些普通方法，和mybitasplus作用一样。又或者使用RestHighLevelClient操作数据。
+
+```java
+ public void addVideo(Video video){
+        videoRepository.save(video);
+    }
+
+ SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+```
+
+
+
+
+
+##### 问题---java中自己定义的特殊类，比如有一些特殊的字段(userInfoList)加入的实体类该如何与ES相对应呢？
+
+使用注解解决
+
+```java
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+
+import java.util.Date;
+import java.util.List;
+
+@Document(indexName = "videos")//索引的名称   如果在ES中没有这个索引的话，ES会自动创建
+public class Video {
+
+    @Id
+    private Long id;
+
+    @Field(type = FieldType.Long)//type表示在ES当中应该以哪种格式存储
+    private Long userId;//用户id
+
+    private String url; //视频链接
+
+    private String thumbnail;//封面
+
+    @Field(type = FieldType.Text)//Text指，title是可以支持分词查询的
+    private String title; //标题
+
+    private String type;// 0自制 1转载
+
+    private String duration;//时长
+
+    private String area;//分区
+
+    private List<VideoTag> videoTagList;//标签列表  可以进行个性化的推荐与定制
+
+    @Field(type = FieldType.Text)
+    private String description;//简介
+
+    @Field(type = FieldType.Date)
+    private Date createTime;
+
+    @Field(type = FieldType.Date)
+    private Date updateTime;
+```
+
+
+
+##### 全文搜索
+
+既可以搜视频相关，也可以搜用户相关nickName等等
+
+**高亮、分词等功能实现**
 
 
 
@@ -354,6 +480,39 @@ springBoot当中，依赖注入默认使用的是单例模式。使用websocket�
 
 
 
+
+
+#### 内容推荐与观看记录
+
+**通过记录观看历史，获取视频内容，通过推荐公式对用户进行个性化的内容推荐**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#### 弹幕遮罩
+
+**处理视频生成人像黑白剪影，实现遮挡弹幕的效果**
 
 
 

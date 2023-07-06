@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.imooc.bilibili.api.support.UserSupport;
 import com.imooc.bilibili.domain.*;
 //import com.imooc.bilibili.service.ElasticSearchService;
+import com.imooc.bilibili.service.ElasticSearchService;
 import com.imooc.bilibili.service.VideoService;
 //import org.apache.mahout.cf.taste.common.TasteException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@CrossOrigin
 public class VideoApi {
 
     @Autowired
@@ -25,8 +27,8 @@ public class VideoApi {
     @Autowired
     private UserSupport userSupport;
 
-//    @Autowired
-//    private ElasticSearchService elasticSearchService;
+    @Autowired
+    private ElasticSearchService elasticSearchService;
 
     /**
      * 视频投稿
@@ -36,8 +38,8 @@ public class VideoApi {
         Long userId = userSupport.getCurrentUserId();//需要登录才能实现的功能
         video.setUserId(userId);
         videoService.addVideos(video);
-        //在es中添加一条视频数据
-//        elasticSearchService.addVideo(video);
+        //在es中添加一条视频数据  注意顺序不能错，要先保存在本地，再添加到ES当中，因为ES中设置了一个主键值为VideoId，而videoService.addVideos(video)这一步过程是设置了VideoId了的
+        elasticSearchService.addVideo(video);
         return JsonResponse.success();
     }
 

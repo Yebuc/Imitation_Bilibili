@@ -28,6 +28,9 @@ public class UserService {
     @Autowired
     private UserAuthService userAuthService;
 
+    @Autowired
+    private ElasticSearchService elasticSearchService;
+
     public void addUser(User user) {//注册
         String phone = user.getPhone();
         if(StringUtils.isNullOrEmpty(phone)){
@@ -62,7 +65,7 @@ public class UserService {
         //添加用户默认权限角色
         userAuthService.addUserDefaultRole(user.getId());
         //同步用户信息数据到es
-//        elasticSearchService.addUserInfo(userInfo);
+        elasticSearchService.addUserInfo(userInfo);
     }
 
     public User getUserByPhone(String phone){

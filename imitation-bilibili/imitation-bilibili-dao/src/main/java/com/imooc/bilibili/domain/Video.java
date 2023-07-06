@@ -1,27 +1,27 @@
 package com.imooc.bilibili.domain;
 
 import org.springframework.data.annotation.Id;
-//import org.springframework.data.elasticsearch.annotations.Document;
-//import org.springframework.data.elasticsearch.annotations.Field;
-//import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.util.Date;
 import java.util.List;
 
-//@Document(indexName = "videos")
+@Document(indexName = "videos")//索引的名称   如果在ES中没有这个索引的话，ES会自动创建
 public class Video {
 
     @Id
     private Long id;
 
-//    @Field(type = FieldType.Long)
+    @Field(type = FieldType.Long)//type表示在ES当中应该以哪种格式存储
     private Long userId;//用户id
 
     private String url; //视频链接
 
     private String thumbnail;//封面
 
-//    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Text)//Text指，title是可以支持分词查询的
     private String title; //标题
 
     private String type;// 0自制 1转载
@@ -32,13 +32,13 @@ public class Video {
 
     private List<VideoTag> videoTagList;//标签列表  可以进行个性化的推荐与定制
 
-//    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Text)
     private String description;//简介
 
-//    @Field(type = FieldType.Date)
+    @Field(type = FieldType.Date)
     private Date createTime;
 
-//    @Field(type = FieldType.Date)
+    @Field(type = FieldType.Date)
     private Date updateTime;
 
     public Long getId() {

@@ -82,6 +82,11 @@
             <artifactId>spring-boot-starter-websocket</artifactId>
             <version>2.5.1</version>
         </dependency>
+        <dependency><!--springframework自带的一个操作ES的依赖-->
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+            <version>2.5.1</version>
+        </dependency>
 
     </dependencies>
 

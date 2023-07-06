@@ -73,12 +73,12 @@ public class VideoService {
         video.setCreateTime(new Date());
         videoDao.addVideos(video);
         Long videoId = video.getId();//在.xml中的特殊操作--->useGeneratedKeys="true" keyProperty="id"表示能够获取到生成的主键id
-        List<VideoTag> tagList = video.getVideoTagList();
-        tagList.forEach(item -> {
-            item.setCreateTime(now);
-            item.setVideoId(videoId);
-        });
-        videoDao.batchAddVideoTags(tagList);
+//        List<VideoTag> tagList = video.getVideoTagList();
+//        tagList.forEach(item -> {
+//            item.setCreateTime(now);
+//            item.setVideoId(videoId);
+//        });
+//        videoDao.batchAddVideoTags(tagList);
     }
 
     public PageResult<Video> pageListVideos(Integer size, Integer no, String area) {

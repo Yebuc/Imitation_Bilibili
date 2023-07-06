@@ -136,6 +136,10 @@ public class WebSocketService {
         }
     }
 
+    public static ApplicationContext getApplicationContext() {
+        return APPLICATION_CONTEXT;
+    }
+
     public Session getSession() {
         return session;
     }
