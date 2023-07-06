@@ -2,17 +2,15 @@ package com.imooc.bilibili.domain;
 
 import java.util.Date;
 
-public class VideoView {
+public class UserPreference {
 
     private Long id;
 
-    private Long videoId;
-
     private Long userId;
 
-    private String clientId;//客户端id--->用来判断是否是同一个用户的判断条件之一
+    private Long videoId;
 
-    private String ip;
+    private Float value;
 
     private Date createTime;
 
@@ -24,14 +22,6 @@ public class VideoView {
         this.id = id;
     }
 
-    public Long getVideoId() {
-        return videoId;
-    }
-
-    public void setVideoId(Long videoId) {
-        this.videoId = videoId;
-    }
-
     public Long getUserId() {
         return userId;
     }
@@ -40,20 +30,20 @@ public class VideoView {
         this.userId = userId;
     }
 
-    public String getClientId() {
-        return clientId;
+    public Long getVideoId() {
+        return videoId;
     }
 
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
+    public void setVideoId(Long videoId) {
+        this.videoId = videoId;
     }
 
-    public String getIp() {
-        return ip;
+    public Float getValue() {
+        return value;
     }
 
-    public void setIp(String ip) {
-        this.ip = ip;
+    public void setValue(Float value) {
+        this.value = value;
     }
 
     public Date getCreateTime() {

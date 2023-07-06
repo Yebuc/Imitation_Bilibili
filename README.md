@@ -486,25 +486,104 @@ public class Video {
 
 **通过记录观看历史，获取视频内容，通过推荐公式对用户进行个性化的内容推荐**
 
+##### 观看记录
+
+```md
+规则--->针对同一个视频，同一个用户一天只能增加一次播放记录，游客也是一天一次(用户退出登录后观看也参与计算播放量)
+```
+
+##### 游客区分规则
+
+```md
+操作系统+浏览器+IP三个参数信息来区别---->这三个参数都可以在请求头里面获取到
+```
+
+##### 内容推荐
+
+```md
+使用协同过滤算法来实现内容推荐，实现选用Apache Mahout来具体实现。
+
+Mahout是一个开源的分布式机器学习算法库，它是一个基于Java实现的可扩展、高效的推荐引擎。
+
+Mahout常用于:基于用户的推荐、基于内容的推荐。
+```
+
+##### 推荐算法步骤
+
+第一
+
+```md
+收集用户偏好数据，用户的偏好数据开源体现在多种操作行为上，如点赞、收藏、转发、是否购买等
+```
+
+第二
+
+```md
+数据降噪与归一化处理：不同偏好维度的数据需要进行数据降噪与归一化处理来形成统一的偏好得分
+
+归一化处理的原因--->由于在不同维度上的评分机制或者偏好计算是不一样的，不好做统一的偏好计算处理，需要有一套归一化的处理机制将不同维度上的数据形成统一的偏好计算。
+```
+
+第三
+
+```md
+算出相似物品或用户：基于用户推荐、基于内容推荐
+```
 
 
 
+##### 基于用户的推荐
+
+```md
+核心思想：推荐和此用户相似的用户喜欢的内容
+
+本质是基于用户对内容的偏好找到相邻的相似用户，然后将邻居用户喜欢的内容推荐给当前用户
+
+例子：张三爱看恐怖电影、爱情电影，李四爱看戏剧电影、王五爱看爱情电影、恐怖电影、纪录片，那么张三和王五的相似度比较高，所以开源推荐张三看纪录片！
+```
 
 
 
+##### 基于物品的推荐
+
+```md
+核心思想：推荐和此用户喜欢内容的相似内容给该用户
+
+本质的基于用户对内容的偏好找到相似的内容，然后依据用户的历史行为偏好，推荐相似的内容给用户
+
+例子：张三以前买手机，则会把和收集相似度搞的其他商品推荐给张三
+```
 
 
 
+##### 偏好打分机制示例
 
+```sql
+CREATE TABLE `t_video_operation` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `userId` BIGINT DEFAULT NULL COMMENT '用户id',
+  `videoId` BIGINT DEFAULT NULL COMMENT '视频id',
+  `operationType` VARCHAR(5) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '操作类型：0点赞、1收藏、2投币',
+  `createTime` DATETIME DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb3 COMMENT='视频操作表';
+```
 
-
-
-
-
-
-
-
-
+```sql
+select
+	userId,
+	videoId,
+	sum(case operationType
+       		when '0' then 6 #点赞
+        	when '1' then 2 #收藏
+        	when '2' then 2 #投币
+        	else 0 and
+       )as 'value'
+       from
+       	t_video_operation
+       	group by userId,videoId
+       	order by userId
+```
 
 
 

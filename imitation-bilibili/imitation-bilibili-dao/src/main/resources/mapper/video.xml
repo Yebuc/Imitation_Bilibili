@@ -318,20 +318,20 @@
             </if>
     </select>
 
-<!--    <select id="getAllUserPreference" resultType="com.imooc.bilibili.domain.UserPreference">-->
-<!--        select-->
-<!--            userId,-->
-<!--            videoId,-->
-<!--            sum(case operationType-->
-<!--                    when '0' then 6-->
-<!--                    when '1' then 2-->
-<!--                    when '2' then 2-->
-<!--                    else 0 end-->
-<!--                ) as `value`-->
-<!--        from-->
-<!--            t_video_operation-->
-<!--        group by userId, videoId-->
-<!--    </select>-->
+    <select id="getAllUserPreference" resultType="com.imooc.bilibili.domain.UserPreference">
+        select
+            userId,
+            videoId,
+            sum(case operationType
+                    when '0' then 6
+                    when '1' then 2
+                    when '2' then 2
+                    else 0 end
+                ) as `value`
+        from
+            t_video_operation
+        group by userId, videoId
+    </select>
 
     <select id="batchGetVideosByIds" resultType="com.imooc.bilibili.domain.Video">
         select

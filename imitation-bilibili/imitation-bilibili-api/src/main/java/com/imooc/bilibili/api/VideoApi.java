@@ -8,6 +8,7 @@ import com.imooc.bilibili.domain.*;
 import com.imooc.bilibili.service.ElasticSearchService;
 import com.imooc.bilibili.service.VideoService;
 //import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.common.TasteException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -192,38 +193,38 @@ public class VideoApi {
     /**
      * 添加视频观看记录
      */
-//    @PostMapping("/video-views")//VideoView中的clientID是什么意思？
-//    public JsonResponse<String> addVideoView(@RequestBody VideoView videoView,
-//                                             HttpServletRequest request){
-//        Long userId;
-//        try{
-//            userId = userSupport.getCurrentUserId();
-//            videoView.setUserId(userId);
-//            videoService.addVideoView(videoView, request);
-//        }catch (Exception e){
-//            videoService.addVideoView(videoView, request);
-//        }
-//        return JsonResponse.success();
-//    }
+    @PostMapping("/video-views")//VideoView中的clientID是---客户端id，用来判定是否是同一个用户的参数之一
+    public JsonResponse<String> addVideoView(@RequestBody VideoView videoView,
+                                             HttpServletRequest request){
+        Long userId;
+        try{
+            userId = userSupport.getCurrentUserId();
+            videoView.setUserId(userId);
+            videoService.addVideoView(videoView, request);
+        }catch (Exception e){//出现空指针异常代表没有userId--->也就是游客模式下
+            videoService.addVideoView(videoView, request);
+        }
+        return JsonResponse.success();
+    }
 
     /**
      * 查询视频播放量
      */
-//    @GetMapping("/video-view-counts")
-//    public JsonResponse<Integer> getVideoViewCounts(@RequestParam Long videoId){
-//        Integer count = videoService.getVideoViewCounts(videoId);
-//        return new JsonResponse<>(count);
-//    }
+    @GetMapping("/video-view-counts")
+    public JsonResponse<Integer> getVideoViewCounts(@RequestParam Long videoId){
+        Integer count = videoService.getVideoViewCounts(videoId);
+        return new JsonResponse<>(count);
+    }
 
     /**
-     * 视频内容推荐
+     * 视频内容推荐  基于用户
      */
-//    @GetMapping("/recommendations")
-//    public JsonResponse<List<Video>> recommend() throws TasteException {
-//        Long userId = userSupport.getCurrentUserId();
-//        List<Video> list = videoService.recommend(userId);
-//        return new JsonResponse<>(list);
-//    }
+    @GetMapping("/recommendations")
+    public JsonResponse<List<Video>> recommend() throws TasteException {
+        Long userId = userSupport.getCurrentUserId();
+        List<Video> list = videoService.recommend(userId);
+        return new JsonResponse<>(list);
+    }
 
     /**
      * 视频帧截取生成黑白剪影

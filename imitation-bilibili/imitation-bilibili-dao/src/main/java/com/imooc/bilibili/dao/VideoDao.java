@@ -63,8 +63,8 @@ public interface VideoDao {
     Integer getVideoViewCounts(Long videoId);
 
     VideoView getVideoView(Map<String, Object> params);
-//
-//    List<UserPreference> getAllUserPreference();
+
+    List<UserPreference> getAllUserPreference();
 
     List<Video> batchGetVideosByIds(@Param("idList") List<Long> idList);
 
