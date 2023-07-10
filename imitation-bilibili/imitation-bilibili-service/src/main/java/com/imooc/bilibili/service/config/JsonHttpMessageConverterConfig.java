@@ -34,7 +34,7 @@ public class JsonHttpMessageConverterConfig {
         );//Json数据序列化
         fastConverter.setFastJsonConfig(fastJsonConfig);
         //如果使用feign进行微服务间的接口调用，则需要加上该配置
-//        fastConverter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
+        fastConverter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));//加上消息转换器改写，微服务可以支持JSON格式的传输
         return new HttpMessageConverters(fastConverter);
     }
 }

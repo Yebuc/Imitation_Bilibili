@@ -457,7 +457,7 @@ public class VideoService {
 //        videoDao.deleteVideoTags(tagIdList, videoId);
 //    }
 //
-    public List<VideoBinaryPicture> getVideoBinaryImages(Map<String, Object> params) {
+    public List<VideoBinaryPicture> getVideoBinaryImages(Map<String, Object> params) {//得到二值图
         return videoDao.getVideoBinaryImages(params);
     }
 }

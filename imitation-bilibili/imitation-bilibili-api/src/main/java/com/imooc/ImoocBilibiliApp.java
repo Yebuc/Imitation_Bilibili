@@ -4,6 +4,8 @@ import com.imooc.bilibili.service.websocket.WebSocketService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.netflix.hystrix.EnableHystrix;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -22,6 +24,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 //@EnableAspectJAutoProxy//开启AOP
 @CrossOrigin//允许跨域
 @Slf4j
+@EnableFeignClients(basePackages = "com.imooc.bilibili.service.feign")//扫描指定的自己定义的feign的包路径
+@EnableHystrix//标注可以使用Hystrix，开启Hystrix功能---断路器功能
 public class ImoocBilibiliApp {
     public static void main(String[] args){
         ApplicationContext app = SpringApplication.run(ImoocBilibiliApp.class,args);//启动方法

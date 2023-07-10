@@ -119,11 +119,12 @@
                     <groupId>log4j</groupId>
                     <artifactId>log4j</artifactId>
                 </exclusion>
+                <!--有冲突的包，需要排除在外-->
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
                 </exclusion>
-                <exclusion>
+                <exclusion><!--因为springBoot默认使用的是restTemplate工具保重的http访问通信,所以需要排除这个客户端以防冲突-->
                     <artifactId>jersey-client</artifactId>
                     <groupId>com.sun.jersey</groupId>
                 </exclusion>
@@ -150,6 +151,22 @@
             <version>4.0.2-1.4.3</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.cloud</groupId><!--eureka的客户端，需要注册到服务端里面去-->
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId><!--微服务之间的调用方法所封装的包-->
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId><!--hystrix是提供熔断、降级等微服务功能，实际上就是会为每个服务创建一个消线程池，各个微服务之间功能不影响-->
+            <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+            <version>2.2.10.RELEASE</version>
+        </dependency>
+
 
     </dependencies>
 
@@ -164,6 +181,19 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <spring.cloud.version>2020.0.5</spring.cloud.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring.cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 </project>

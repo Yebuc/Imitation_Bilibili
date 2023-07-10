@@ -29,16 +29,16 @@ public class ImageUtil {
     private static final String BAIDU_TOKEN_KEY = "baidu-access-token";
 
     @Value("${baidu.develop.auth.url}")
-    private String authUrl;
+    private String authUrl;//获取token的地址
 
     @Value("${baidu.develop.clientId}")
-    private String clientId;
+    private String clientId;//access key
 
     @Value("${baidu.develop.clientSecret}")
-    private String clientSecret;
+    private String clientSecret;//secret key
 
     @Value("${baidu.develop.splitBody.url}")
-    private String splitBodyUrl;
+    private String splitBodyUrl;//调用的接口地址
 
     public BufferedImage getBodyOutline(BufferedImage image, InputStream inputStream) throws Exception {
         //调用百度api进行人像分割
@@ -48,18 +48,19 @@ public class ImageUtil {
         return this.convert(resultJson.getString("labelmap"), image.getWidth(), image.getHeight());
     }
 
-    public String bodySeg(InputStream inputStream) throws Exception{
+    public String bodySeg(InputStream inputStream) throws Exception{//主方法
         System.out.println("开始请求百度人体分割api");
         long start = System.currentTimeMillis();
         String imgStr = this.convertFileToBase64(inputStream);
         String accessToken = redisTemplate.opsForValue().get(BAIDU_TOKEN_KEY);
         if(StringUtil.isNullOrEmpty(accessToken)){
             accessToken = this.getAuth();
-            redisTemplate.opsForValue().set(BAIDU_TOKEN_KEY, accessToken);
+            redisTemplate.opsForValue().set(BAIDU_TOKEN_KEY, accessToken);//设置30天后过期，因为百度API就是设置30天过期Token
         }
         Map<String, Object> params = new HashMap<>();
         params.put("image", imgStr);
         splitBodyUrl += "?access_token=" + accessToken;//请求参数的拼接
+        //http在线调用接口---这个部分相当于sdk
         HttpUtil.HttpResponse result = HttpUtil.postUrlEncoded(splitBodyUrl, params);
         System.out.println("请求结束，总时间(s)为：" +( (System.currentTimeMillis() - start)/ 1000F));
         return result.getBody();
@@ -118,7 +119,7 @@ public class ImageUtil {
     private String getAuth() throws Exception{
         // 获取token地址
         StringBuilder sb = new StringBuilder(authUrl);
-        sb.append("?grant_type=client_credentials").append("&client_id=" + clientId).append("&client_secret=" + clientSecret);
+        sb.append("?grant_type=client_credentials").append("&client_id=" + clientId).append("&client_secret=" + clientSecret);//sk--->密钥获取Token
         URL realUrl = new URL(sb.toString());
         // 打开和URL之间的连接
         HttpURLConnection connection = (HttpURLConnection) realUrl.openConnection();

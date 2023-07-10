@@ -1,0 +1,14 @@
+com\imooc\bilibili\api\support\UserSupport.class
+com\imooc\bilibili\api\UserApi.class
+com\imooc\bilibili\api\aspect\ApiLimitedRoleAspect.class
+com\imooc\bilibili\api\aspect\DataLimitedAspect.class
+com\imooc\bilibili\api\FileApi.class
+com\imooc\ImoocBilibiliApp.class
+com\imooc\bilibili\api\SystemApi.class
+com\imooc\bilibili\api\DemoApi.class
+com\imooc\bilibili\api\UserMomentsApi.class
+com\imooc\bilibili\api\UserFollowingApi.class
+com\imooc\bilibili\api\UserAuthApi.class
+com\imooc\bilibili\api\RestfulApi.class
+com\imooc\bilibili\api\DanmuApi.class
+com\imooc\bilibili\api\VideoApi.class
